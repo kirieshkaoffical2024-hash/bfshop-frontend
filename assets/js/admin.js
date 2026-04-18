@@ -272,7 +272,7 @@ async function loadAllUsers() {
         
         container.innerHTML = response.users.map(user => `
             <div class="user-card">
-                <img src="${user.avatar_url || '/assets/images/default-avatar.png'}" alt="${user.username}" class="user-avatar">
+                <img src="${user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=667eea&color=fff&size=80`}" alt="${user.username}" class="user-avatar">
                 <div class="user-info">
                     <h4>${user.username} ${user.is_admin ? '👑' : ''} ${user.is_banned ? '🚫' : ''}</h4>
                     <p>Рейтинг: ${user.rating ? user.rating.toFixed(1) : '0.0'} ⭐ (${user.total_reviews || 0} отзывов)</p>
@@ -318,7 +318,7 @@ async function searchUsers() {
         
         container.innerHTML = response.users.map(user => `
             <div class="user-card">
-                <img src="${user.avatar_url || '/assets/images/default-avatar.png'}" alt="${user.username}" class="user-avatar">
+                <img src="${user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=667eea&color=fff&size=80`}" alt="${user.username}" class="user-avatar">
                 <div class="user-info">
                     <h4>${user.username} ${user.is_admin ? '👑' : ''} ${user.is_banned ? '🚫' : ''}</h4>
                     <p>Рейтинг: ${user.rating ? user.rating.toFixed(1) : '0.0'} ⭐</p>
