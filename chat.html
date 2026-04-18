@@ -36,11 +36,12 @@
     <!-- Chat Section -->
     <section class="chat-section">
         <div class="container">
-            <div class="chat-container">
+            <div id="loading" class="loading">Загрузка чата...</div>
+            <div class="chat-container" id="chatContainer" style="display: none;">
                 <!-- Chat Header -->
                 <div class="chat-header">
                     <div class="chat-order-info">
-                        <h3 id="orderTitle">Чат заказа</h3>
+                        <h3 id="chatTitle">Чат заказа</h3>
                         <div class="order-status" id="orderStatus"></div>
                     </div>
                     <div class="chat-actions">
@@ -49,8 +50,7 @@
                 </div>
 
                 <!-- Messages -->
-                <div class="chat-messages" id="chatMessages">
-                    <div class="loading">Загрузка сообщений...</div>
+                <div class="chat-messages" id="messages">
                 </div>
 
                 <!-- Input -->
