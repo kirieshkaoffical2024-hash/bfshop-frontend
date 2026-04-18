@@ -32,7 +32,8 @@ async function loadProfile() {
         const userData = await apiRequest(`/users/${profileUserId}`);
         
         // Update UI
-        document.getElementById('profileAvatar').src = userData.avatar_url || '/assets/images/default-avatar.png';
+        const avatarUrl = userData.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.username)}&background=667eea&color=fff&size=200`;
+        document.getElementById('profileAvatar').src = avatarUrl;
         document.getElementById('profileUsername').textContent = userData.username;
         document.getElementById('profileRating').textContent = formatRating(userData.rating || 0);
         document.getElementById('totalReviews').textContent = userData.total_reviews || 0;
@@ -144,7 +145,7 @@ function createReviewElement(review) {
     
     div.innerHTML = `
         <div class="review-header">
-            <img src="${review.reviewer_avatar || '/assets/images/default-avatar.png'}" alt="Reviewer" class="review-avatar">
+            <img src="${review.reviewer_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.reviewer_username)}&background=667eea&color=fff&size=80`}" alt="Reviewer" class="review-avatar">
             <div class="review-info">
                 <div class="review-author">${review.reviewer_username}</div>
                 <div class="review-rating">${stars} ${review.rating}/5</div>
