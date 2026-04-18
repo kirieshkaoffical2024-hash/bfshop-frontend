@@ -23,7 +23,8 @@ async function loadListing() {
         currentUser = await checkAuth();
         
         // Load listing
-        listing = await apiRequest(`/listings/${listingId}`);
+        const response = await apiRequest(`/listings/${listingId}`);
+        listing = response.listing;
         
         // Update UI
         const typeEmoji = {
@@ -33,15 +34,19 @@ async function loadListing() {
             'boss': '👹'
         };
         
-        document.getElementById('listingType').textContent = `${typeEmoji[listing.type]} ${listing.type}`;
+        document.getElementById('listingType').textContent = `${typeEmoji[listing.type] || ''} ${listing.type.toUpperCase()}`;
         document.getElementById('listingTitle').textContent = listing.title;
-        document.getElementById('listingDescription').textContent = listing.description;
+        document.getElementById('listingDescription').textContent = listing.description || 'Нет описания';
         document.getElementById('listingPrice').textContent = `🍎 ${listing.price_amount}x ${listing.price_fruit}`;
         
         // Seller info
-        document.getElementById('sellerAvatar').src = listing.seller_avatar || '/assets/images/default-avatar.png';
-        document.getElementById('sellerName').textContent = listing.seller_username;
-        document.getElementById('sellerRating').textContent = formatRating(listing.seller_rating || 0);
+        const sellerAvatar = document.getElementById('sellerAvatar');
+        if (sellerAvatar) {
+            sellerAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.seller_name)}&background=e94560&color=fff`;
+        }
+        document.getElementById('sellerName').textContent = listing.seller_name;
+        const sellerRating = parseFloat(listing.seller_rating) || 0;
+        document.getElementById('sellerRating').textContent = `⭐ ${sellerRating.toFixed(1)}`;
         
         // Buy button
         const buyBtn = document.getElementById('buyBtn');
@@ -68,13 +73,16 @@ async function loadListing() {
 // Load seller reviews
 async function loadSellerReviews() {
     try {
-        const reviews = await apiRequest(`/reviews/${listing.seller_id}`);
+        const response = await apiRequest(`/reviews/${listing.seller_id}`);
+        const reviews = response.reviews || [];
         
         const container = document.getElementById('reviewsList');
+        if (!container) return;
+        
         container.innerHTML = '';
         
         if (reviews.length === 0) {
-            container.innerHTML = '<p class="no-reviews">No reviews yet</p>';
+            container.innerHTML = '<p class="no-reviews">Нет отзывов</p>';
             return;
         }
         
@@ -93,13 +101,13 @@ function createReviewElement(review) {
     const div = document.createElement('div');
     div.className = 'review-item';
     
-    const stars = '⭐'.repeat(review.rating);
+    const stars = '⭐'.repeat(review.rating || 0);
     
     div.innerHTML = `
         <div class="review-header">
-            <img src="${review.reviewer_avatar || '/assets/images/default-avatar.png'}" alt="Reviewer" class="review-avatar">
+            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(review.reviewer_name)}&background=e94560&color=fff" alt="Reviewer" class="review-avatar">
             <div class="review-info">
-                <div class="review-author">${review.reviewer_username}</div>
+                <div class="review-author">${review.reviewer_name}</div>
                 <div class="review-rating">${stars} ${review.rating}/5</div>
             </div>
             <div class="review-date">${formatDate(review.created_at)}</div>
@@ -113,19 +121,27 @@ function createReviewElement(review) {
 // Show buy modal
 function showBuyModal() {
     const modal = document.getElementById('buyModal');
+    if (!modal) return;
+    
     modal.style.display = 'flex';
     
-    document.getElementById('cancelBuyBtn').onclick = () => {
-        modal.style.display = 'none';
-    };
+    const cancelBtn = document.getElementById('cancelBuyBtn');
+    if (cancelBtn) {
+        cancelBtn.onclick = () => {
+            modal.style.display = 'none';
+        };
+    }
     
-    document.getElementById('confirmBuyBtn').onclick = confirmPurchase;
+    const confirmBtn = document.getElementById('confirmBuyBtn');
+    if (confirmBtn) {
+        confirmBtn.onclick = confirmPurchase;
+    }
 }
 
 // Confirm purchase
 async function confirmPurchase() {
     try {
-        const order = await apiRequest('/orders', {
+        const response = await apiRequest('/orders', {
             method: 'POST',
             body: JSON.stringify({
                 listing_id: listingId,
@@ -135,14 +151,15 @@ async function confirmPurchase() {
         });
         
         // Close modal
-        document.getElementById('buyModal').style.display = 'none';
+        const modal = document.getElementById('buyModal');
+        if (modal) modal.style.display = 'none';
         
         // Redirect to chat
-        window.location.href = `chat.html?order=${order.id}`;
+        window.location.href = `chat.html?order=${response.order.id}`;
         
     } catch (error) {
         console.error('Error creating order:', error);
-        alert('Failed to create order: ' + error.message);
+        alert('Ошибка создания заказа: ' + error.message);
     }
 }
 
