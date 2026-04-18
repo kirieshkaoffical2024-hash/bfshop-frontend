@@ -1,86 +1,191 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мои заказы - BFshop</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-</head>
-<body>
-    <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <h1>🎮 BFshop</h1>
+// Orders Page JavaScript
+
+let currentUser = null;
+
+// Load orders
+async function loadOrders() {
+    try {
+        currentUser = await checkAuth();
+        
+        if (!currentUser) {
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        // Load buying orders
+        await loadBuyingOrders();
+        
+        // Load selling orders
+        await loadSellingOrders();
+        
+    } catch (error) {
+        console.error('Error loading orders:', error);
+    }
+}
+
+// Load buying orders
+async function loadBuyingOrders() {
+    try {
+        const response = await apiRequest('/orders');
+        const allOrders = response.orders || [];
+        
+        // Фильтруем заказы где текущий пользователь - покупатель
+        const orders = allOrders.filter(order => order.buyer_id === currentUser.id);
+        
+        const container = document.getElementById('buyingOrders');
+        const loading = document.getElementById('buyingLoading');
+        const noResults = document.getElementById('noBuyingOrders');
+        
+        loading.style.display = 'none';
+        
+        if (orders.length === 0) {
+            noResults.style.display = 'block';
+            return;
+        }
+        
+        container.innerHTML = '';
+        
+        orders.forEach(order => {
+            const orderEl = createOrderElement(order, 'buyer');
+            container.appendChild(orderEl);
+        });
+        
+    } catch (error) {
+        console.error('Error loading buying orders:', error);
+        document.getElementById('buyingLoading').textContent = 'Ошибка загрузки заказов';
+    }
+}
+
+// Load selling orders
+async function loadSellingOrders() {
+    try {
+        const response = await apiRequest('/orders');
+        const allOrders = response.orders || [];
+        
+        // Фильтруем заказы где текущий пользователь - продавец
+        const orders = allOrders.filter(order => order.seller_id === currentUser.id);
+        
+        const container = document.getElementById('sellingOrders');
+        const loading = document.getElementById('sellingLoading');
+        const noResults = document.getElementById('noSellingOrders');
+        
+        loading.style.display = 'none';
+        
+        if (orders.length === 0) {
+            noResults.style.display = 'block';
+            return;
+        }
+        
+        container.innerHTML = '';
+        
+        orders.forEach(order => {
+            const orderEl = createOrderElement(order, 'seller');
+            container.appendChild(orderEl);
+        });
+        
+    } catch (error) {
+        console.error('Error loading selling orders:', error);
+        document.getElementById('sellingLoading').textContent = 'Ошибка загрузки заказов';
+    }
+}
+
+// Create order element
+function createOrderElement(order, role) {
+    const div = document.createElement('div');
+    div.className = 'order-card';
+    
+    const statusText = {
+        'pending': 'Ожидает',
+        'confirmed': 'Подтверждён',
+        'completed': 'Завершён',
+        'cancelled': 'Отменён'
+    };
+    
+    const statusColors = {
+        'pending': 'warning',
+        'confirmed': 'success',
+        'completed': 'success',
+        'cancelled': 'error'
+    };
+    
+    const statusColor = statusColors[order.status] || 'secondary';
+    const statusLabel = statusText[order.status] || order.status;
+    
+    const otherUserName = role === 'buyer' ? order.seller_name : order.buyer_name;
+    
+    div.innerHTML = `
+        <div class="order-header">
+            <div class="order-id">Заказ #${order.id}</div>
+            <div class="order-status status-${statusColor}">${statusLabel}</div>
+        </div>
+        <div class="order-body">
+            <div class="order-listing">
+                <h4>${order.listing_title}</h4>
+            </div>
+            <div class="order-details">
+                <div class="order-detail-row">
+                    <span class="label">💰 Цена:</span>
+                    <span class="value">${order.fruit_amount}x ${order.fruit_offered}</span>
                 </div>
-                <nav class="nav">
-                    <a href="index.html" class="nav-link">Главная</a>
-                    <a href="#" class="nav-link" id="myListingsLink">Мои объявления</a>
-                    <a href="orders.html" class="nav-link active">Мои заказы</a>
-                    <a href="create-listing.html" class="nav-link">Продать</a>
-                </nav>
-                <div class="header-actions">
-                    <div class="user-menu" id="userMenu" style="display: none;">
-                        <img src="" alt="Avatar" class="user-avatar" id="userAvatar">
-                        <span class="user-name" id="userName"></span>
-                        <button class="btn btn-secondary" id="logoutBtn">Выход</button>
-                    </div>
-                    <div class="auth-buttons" id="authButtons">
-                        <a href="login.html" class="btn btn-secondary">Вход</a>
-                        <a href="login.html?register=true" class="btn btn-primary">Регистрация</a>
-                    </div>
+                <div class="order-detail-row">
+                    <span class="label">${role === 'buyer' ? '👤 Продавец:' : '👤 Покупатель:'}</span>
+                    <span class="value">${otherUserName}</span>
+                </div>
+                <div class="order-detail-row">
+                    <span class="label">📅 Создан:</span>
+                    <span class="value">${formatDate(order.created_at)}</span>
                 </div>
             </div>
         </div>
-    </header>
-
-    <!-- Orders Section -->
-    <section class="orders-section">
-        <div class="container">
-            <h2 class="page-title">📦 Мои заказы</h2>
-
-            <!-- Tabs -->
-            <div class="orders-tabs">
-                <button class="tab-btn active" data-tab="buying">Покупки</button>
-                <button class="tab-btn" data-tab="selling">Продажи</button>
-            </div>
-
-            <!-- Tab Content -->
-            <div class="tab-content">
-                <!-- Buying Tab -->
-                <div id="buyingTab" class="tab-pane active">
-                    <div class="loading" id="buyingLoading">Загрузка...</div>
-                    <div class="orders-list" id="buyingOrders"></div>
-                    <div class="no-results" id="noBuyingOrders" style="display: none;">
-                        <p>Нет заказов как покупатель</p>
-                        <a href="index.html" class="btn btn-primary">Смотреть объявления</a>
-                    </div>
-                </div>
-
-                <!-- Selling Tab -->
-                <div id="sellingTab" class="tab-pane" style="display: none;">
-                    <div class="loading" id="sellingLoading">Загрузка...</div>
-                    <div class="orders-list" id="sellingOrders"></div>
-                    <div class="no-results" id="noSellingOrders" style="display: none;">
-                        <p>Нет заказов как продавец</p>
-                        <a href="create-listing.html" class="btn btn-primary">Создать объявление</a>
-                    </div>
-                </div>
-            </div>
+        <div class="order-actions">
+            <button class="btn btn-primary btn-sm" onclick="openChat(${order.id})">💬 Открыть чат</button>
+            ${order.status === 'completed' && !order.has_review ? 
+                `<button class="btn btn-secondary btn-sm" onclick="leaveReview(${order.id})">⭐ Оставить отзыв</button>` : ''}
         </div>
-    </section>
+    `;
+    
+    return div;
+}
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2024 BFshop. Все права защищены.</p>
-            <p>Торгуйте безопасно с оплатой фруктами!</p>
-        </div>
-    </footer>
+// View order details
+function viewOrder(orderId) {
+    window.location.href = `listing.html?order=${orderId}`;
+}
 
-    <script src="assets/js/app.js"></script>
-    <script src="assets/js/orders.js"></script>
-</body>
-</html>
+// Open chat
+function openChat(orderId) {
+    window.location.href = `chat.html?order=${orderId}`;
+}
 
+// Leave review
+function leaveReview(orderId) {
+    window.location.href = `chat.html?order=${orderId}#review`;
+}
+
+// Tab switching
+document.addEventListener('DOMContentLoaded', () => {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tab = btn.dataset.tab;
+            
+            // Update buttons
+            tabBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Update content
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.style.display = 'none';
+            });
+            
+            if (tab === 'buying') {
+                document.getElementById('buyingTab').style.display = 'block';
+            } else if (tab === 'selling') {
+                document.getElementById('sellingTab').style.display = 'block';
+            }
+        });
+    });
+    
+    loadOrders();
+});
