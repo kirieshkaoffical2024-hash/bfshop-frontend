@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чат - BFshop</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>🎮 BFshop</h1>
+                </div>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link">Главная</a>
+                    <a href="#" class="nav-link" id="myListingsLink">Мои объявления</a>
+                    <a href="#" class="nav-link" id="myOrdersLink">Мои заказы</a>
+                    <a href="create-listing.html" class="nav-link">Продать</a>
+                </nav>
+                <div class="header-actions">
+                    <div class="user-menu" id="userMenu" style="display: none;">
+                        <img src="" alt="Avatar" class="user-avatar" id="userAvatar">
+                        <span class="user-name" id="userName"></span>
+                        <button class="btn btn-secondary" id="logoutBtn">Выход</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Chat Section -->
+    <section class="chat-section">
+        <div class="container">
+            <div class="chat-container">
+                <!-- Chat Header -->
+                <div class="chat-header">
+                    <div class="chat-order-info">
+                        <h3 id="orderTitle">Чат заказа</h3>
+                        <div class="order-status" id="orderStatus"></div>
+                    </div>
+                    <div class="chat-actions">
+                        <button class="btn btn-secondary btn-sm" id="viewOrderBtn">Посмотреть заказ</button>
+                    </div>
+                </div>
+
+                <!-- Messages -->
+                <div class="chat-messages" id="chatMessages">
+                    <div class="loading">Загрузка сообщений...</div>
+                </div>
+
+                <!-- Input -->
+                <div class="chat-input-container">
+                    <input type="text" id="messageInput" placeholder="Введите сообщение..." class="chat-input">
+                    <button class="btn btn-primary" id="sendBtn">Отправить</button>
+                </div>
+
+                <!-- Order Actions (for seller) -->
+                <div class="order-actions" id="orderActions" style="display: none;">
+                    <div class="order-actions-box">
+                        <h4>Действия с заказом</h4>
+                        <p>После получения оплаты фруктом, подтвердите заказ:</p>
+                        <button class="btn btn-primary" id="confirmOrderBtn">✅ Подтвердить заказ</button>
+                    </div>
+                </div>
+
+                <!-- Review Section (after completion) -->
+                <div class="review-section" id="reviewSection" style="display: none;">
+                    <div class="review-box">
+                        <h4>Оставить отзыв</h4>
+                        <div class="star-rating" id="starRating">
+                            <span class="star" data-rating="1">☆</span>
+                            <span class="star" data-rating="2">☆</span>
+                            <span class="star" data-rating="3">☆</span>
+                            <span class="star" data-rating="4">☆</span>
+                            <span class="star" data-rating="5">☆</span>
+                        </div>
+                        <textarea id="reviewComment" placeholder="Напишите ваш отзыв..." rows="3"></textarea>
+                        <button class="btn btn-primary" id="submitReviewBtn">Отправить отзыв</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 BFshop. Все права защищены.</p>
+            <p>Торгуйте безопасно с оплатой фруктами!</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/chat-client.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль - BFshop</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>🎮 BFshop</h1>
+                </div>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link">Главная</a>
+                    <a href="#" class="nav-link" id="myListingsLink">Мои объявления</a>
+                    <a href="#" class="nav-link" id="myOrdersLink">Мои заказы</a>
+                    <a href="create-listing.html" class="nav-link">Продать</a>
+                </nav>
+                <div class="header-actions">
+                    <div class="user-menu" id="userMenu" style="display: none;">
+                        <img src="" alt="Avatar" class="user-avatar" id="userAvatar">
+                        <span class="user-name" id="userName"></span>
+                        <button class="btn btn-secondary" id="logoutBtn">Выход</button>
+                    </div>
+                    <div class="auth-buttons" id="authButtons">
+                        <a href="login.html" class="btn btn-secondary">Вход</a>
+                        <a href="login.html?register=true" class="btn btn-primary">Регистрация</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Profile Section -->
+    <section class="profile-section">
+        <div class="container">
+            <div class="loading" id="loading">Загрузка...</div>
+
+            <div id="profileContent" style="display: none;">
+                <!-- Profile Header -->
+                <div class="profile-header">
+                    <div class="profile-avatar-container">
+                        <img id="profileAvatar" src="" alt="Avatar" class="profile-avatar">
+                        <div class="avatar-upload" id="avatarUpload" style="display: none;">
+                            <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                            <button class="btn btn-secondary btn-sm" id="uploadAvatarBtn">Изменить аватар</button>
+                        </div>
+                    </div>
+                    <div class="profile-info">
+                        <h1 class="profile-username" id="profileUsername"></h1>
+                        <div class="profile-rating" id="profileRating"></div>
+                        <div class="profile-stats">
+                            <div class="stat">
+                                <span class="stat-value" id="totalListings">0</span>
+                                <span class="stat-label">Объявлений</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value" id="totalSales">0</span>
+                                <span class="stat-label">Продаж</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value" id="totalReviews">0</span>
+                                <span class="stat-label">Отзывов</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="profile-tabs">
+                    <button class="tab-btn active" data-tab="listings">Мои объявления</button>
+                    <button class="tab-btn" data-tab="reviews">Отзывы</button>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Listings Tab -->
+                    <div id="listingsTab" class="tab-pane active">
+                        <div class="listings-grid" id="userListings"></div>
+                        <div class="no-results" id="noListings" style="display: none;">
+                            <p>Пока нет объявлений</p>
+                            <a href="create-listing.html" class="btn btn-primary">Создать первое объявление</a>
+                        </div>
+                    </div>
+
+                    <!-- Reviews Tab -->
+                    <div id="reviewsTab" class="tab-pane" style="display: none;">
+                        <div class="reviews-list" id="userReviews"></div>
+                        <div class="no-results" id="noReviews" style="display: none;">
+                            <p>Пока нет отзывов</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 BFshop. Все права защищены.</p>
+            <p>Торгуйте безопасно с оплатой фруктами!</p>
+        </div>
+    </footer>
+
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/profile.js"></script>
+</body>
+</html>
+

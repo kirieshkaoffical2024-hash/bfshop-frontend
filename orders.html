@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои заказы - BFshop</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>🎮 BFshop</h1>
+                </div>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link">Главная</a>
+                    <a href="#" class="nav-link" id="myListingsLink">Мои объявления</a>
+                    <a href="orders.html" class="nav-link active">Мои заказы</a>
+                    <a href="create-listing.html" class="nav-link">Продать</a>
+                </nav>
+                <div class="header-actions">
+                    <div class="user-menu" id="userMenu" style="display: none;">
+                        <img src="" alt="Avatar" class="user-avatar" id="userAvatar">
+                        <span class="user-name" id="userName"></span>
+                        <button class="btn btn-secondary" id="logoutBtn">Выход</button>
+                    </div>
+                    <div class="auth-buttons" id="authButtons">
+                        <a href="login.html" class="btn btn-secondary">Вход</a>
+                        <a href="login.html?register=true" class="btn btn-primary">Регистрация</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Orders Section -->
+    <section class="orders-section">
+        <div class="container">
+            <h2 class="page-title">📦 Мои заказы</h2>
+
+            <!-- Tabs -->
+            <div class="orders-tabs">
+                <button class="tab-btn active" data-tab="buying">Покупки</button>
+                <button class="tab-btn" data-tab="selling">Продажи</button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Buying Tab -->
+                <div id="buyingTab" class="tab-pane active">
+                    <div class="loading" id="buyingLoading">Загрузка...</div>
+                    <div class="orders-list" id="buyingOrders"></div>
+                    <div class="no-results" id="noBuyingOrders" style="display: none;">
+                        <p>Нет заказов как покупатель</p>
+                        <a href="index.html" class="btn btn-primary">Смотреть объявления</a>
+                    </div>
+                </div>
+
+                <!-- Selling Tab -->
+                <div id="sellingTab" class="tab-pane" style="display: none;">
+                    <div class="loading" id="sellingLoading">Загрузка...</div>
+                    <div class="orders-list" id="sellingOrders"></div>
+                    <div class="no-results" id="noSellingOrders" style="display: none;">
+                        <p>Нет заказов как продавец</p>
+                        <a href="create-listing.html" class="btn btn-primary">Создать объявление</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 BFshop. Все права защищены.</p>
+            <p>Торгуйте безопасно с оплатой фруктами!</p>
+        </div>
+    </footer>
+
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/orders.js"></script>
+</body>
+</html>
+

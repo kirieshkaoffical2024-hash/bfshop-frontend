@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель - BFshop</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>🎮 BFshop - Админ</h1>
+                </div>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link">Главная</a>
+                    <a href="admin.html" class="nav-link active">Админ-панель</a>
+                </nav>
+                <div class="header-actions">
+                    <div class="user-menu" id="userMenu" style="display: none;">
+                        <img src="" alt="Avatar" class="user-avatar" id="userAvatar">
+                        <span class="user-name" id="userName"></span>
+                        <button class="btn btn-secondary" id="logoutBtn">Выход</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Panel -->
+    <section class="admin-section">
+        <div class="container">
+            <h2 class="page-title">👑 Админ-панель</h2>
+
+            <!-- Tabs -->
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="tickets">Жалобы</button>
+                <button class="tab-btn" data-tab="banned">Забаненные</button>
+                <button class="tab-btn" data-tab="users">Пользователи</button>
+            </div>
+
+            <!-- Tickets Tab -->
+            <div id="ticketsTab" class="tab-pane active">
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h3>⚠️ Жалобы на скамеров</h3>
+                        <select id="ticketStatusFilter" class="filter-select">
+                            <option value="">Все</option>
+                            <option value="open">Открытые</option>
+                            <option value="in_progress">В работе</option>
+                            <option value="resolved">Решенные</option>
+                            <option value="rejected">Отклоненные</option>
+                        </select>
+                    </div>
+                    <div id="adminTicketsList" class="admin-tickets-list">
+                        <div class="loading">Загрузка...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Banned Tab -->
+            <div id="bannedTab" class="tab-pane" style="display: none;">
+                <div class="admin-card">
+                    <h3>🚫 Забаненные пользователи</h3>
+                    <div id="bannedUsersList" class="banned-users-list">
+                        <div class="loading">Загрузка...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Tab -->
+            <div id="usersTab" class="tab-pane" style="display: none;">
+                <div class="admin-card">
+                    <h3>👥 Все пользователи</h3>
+                    <div class="search-box">
+                        <input type="text" id="userSearch" placeholder="Поиск по нику...">
+                    </div>
+                    <div id="usersList" class="users-list">
+                        <div class="loading">Загрузка...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ticket Modal -->
+    <div id="ticketModal" class="modal" style="display: none;">
+        <div class="modal-content modal-large">
+            <button class="modal-close" onclick="closeTicketModal()">×</button>
+            <h3>Жалоба #<span id="modalTicketId"></span></h3>
+            
+            <div class="ticket-details">
+                <div class="ticket-info">
+                    <p><strong>От:</strong> <span id="modalReporter"></span></p>
+                    <p><strong>На:</strong> <span id="modalReported"></span></p>
+                    <p><strong>Причина:</strong> <span id="modalReason"></span></p>
+                    <p><strong>Дата:</strong> <span id="modalDate"></span></p>
+                    <p><strong>Статус:</strong> <span id="modalStatus"></span></p>
+                </div>
+                
+                <div class="ticket-description">
+                    <h4>Описание:</h4>
+                    <p id="modalDescription"></p>
+                </div>
+
+                <div class="ticket-actions">
+                    <h4>Действия:</h4>
+                    
+                    <div class="form-group">
+                        <label>Ответ администратора:</label>
+                        <textarea id="adminResponse" rows="4" placeholder="Ваш ответ..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Изменить статус:</label>
+                        <select id="ticketNewStatus">
+                            <option value="in_progress">В работе</option>
+                            <option value="resolved">Решено</option>
+                            <option value="rejected">Отклонено</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="respondToTicket()">Отправить ответ</button>
+                    <button class="btn btn-error" onclick="banUserFromTicket()">Забанить пользователя</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ban Modal -->
+    <div id="banModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeBanModal()">×</button>
+            <h3>Забанить пользователя</h3>
+            
+            <div class="form-group">
+                <label>Пользователь:</label>
+                <input type="text" id="banUsername" readonly>
+                <input type="hidden" id="banUserId">
+            </div>
+
+            <div class="form-group">
+                <label>Причина бана:</label>
+                <textarea id="banReason" rows="3" placeholder="Укажите причину..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Длительность:</label>
+                <select id="banDuration">
+                    <option value="0">Навсегда</option>
+                    <option value="1">1 день</option>
+                    <option value="3">3 дня</option>
+                    <option value="7">7 дней</option>
+                    <option value="30">30 дней</option>
+                </select>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeBanModal()">Отмена</button>
+                <button class="btn btn-error" onclick="confirmBan()">Забанить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 BFshop. Все права защищены.</p>
+        </div>
+    </footer>
+
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/admin.js"></script>
+</body>
+</html>

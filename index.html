@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BFshop - Маркетплейс Blox Fruits</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>🎮 BFshop</h1>
+                </div>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link active">Главная</a>
+                    <a href="#" class="nav-link" id="myListingsLink">Мои товары</a>
+                    <a href="#" class="nav-link" id="myOrdersLink">Мои заказы</a>
+                    <a href="support.html" class="nav-link">Поддержка</a>
+                    <a href="create-listing.html" class="nav-link">Продать</a>
+                    <a href="admin.html" class="nav-link" id="adminLink" style="display: none;">👑 Админ</a>
+                </nav>
+                <div class="header-actions">
+                    <div class="user-menu" id="userMenu" style="display: none;">
+                        <img src="" alt="Аватар" class="user-avatar" id="userAvatar">
+                        <span class="user-name" id="userName"></span>
+                        <button class="btn btn-secondary" id="logoutBtn">Выйти</button>
+                    </div>
+                    <div class="auth-buttons" id="authButtons">
+                        <a href="login.html" class="btn btn-secondary">Войти</a>
+                        <a href="login.html?register=true" class="btn btn-primary">Регистрация</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h2 class="hero-title">Торгуйте предметами Blox Fruits безопасно</h2>
+            <p class="hero-subtitle">Покупайте и продавайте аккаунты, прокачку и услуги за фрукты</p>
+            <div class="search-bar">
+                <input type="text" placeholder="Поиск товаров..." id="searchInput">
+                <button class="btn btn-primary" id="searchBtn">Найти</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filters -->
+    <section class="filters">
+        <div class="container">
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-type="all">Все</button>
+                <button class="filter-btn" data-type="account">🎮 Аккаунты</button>
+                <button class="filter-btn" data-type="boost">⚡ Прокачка</button>
+                <button class="filter-btn" data-type="quest">🗡️ Квесты</button>
+                <button class="filter-btn" data-type="boss">👹 Боссы</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Listings -->
+    <section class="listings">
+        <div class="container">
+            <div class="listings-grid" id="listingsGrid">
+                <!-- Listings will be loaded here -->
+            </div>
+            <div class="loading" id="loading">Загрузка...</div>
+            <div class="no-results" id="noResults" style="display: none;">
+                <p>Товары не найдены</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 BFshop. Все права защищены.</p>
+            <p>Торгуйте безопасно за фрукты!</p>
+        </div>
+    </footer>
+
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/listings.js"></script>
+</body>
+</html>
+

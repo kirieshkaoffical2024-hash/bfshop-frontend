@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поддержка - BFshop</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>🎮 BFshop</h1>
+                </div>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link">Главная</a>
+                    <a href="#" class="nav-link" id="myListingsLink">Мои объявления</a>
+                    <a href="#" class="nav-link" id="myOrdersLink">Мои заказы</a>
+                    <a href="support.html" class="nav-link active">Поддержка</a>
+                    <a href="create-listing.html" class="nav-link">Продать</a>
+                </nav>
+                <div class="header-actions">
+                    <div class="user-menu" id="userMenu" style="display: none;">
+                        <img src="" alt="Avatar" class="user-avatar" id="userAvatar">
+                        <span class="user-name" id="userName"></span>
+                        <button class="btn btn-secondary" id="logoutBtn">Выход</button>
+                    </div>
+                    <div class="auth-buttons" id="authButtons">
+                        <a href="login.html" class="btn btn-secondary">Вход</a>
+                        <a href="login.html?register=true" class="btn btn-primary">Регистрация</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Support Section -->
+    <section class="support-section">
+        <div class="container">
+            <h2 class="page-title">🛡️ Поддержка</h2>
+
+            <!-- Report Scammer Form -->
+            <div class="support-card">
+                <h3>⚠️ Пожаловаться на скамера</h3>
+                <p>Если вас обманули, заполните форму ниже. Администратор рассмотрит жалобу.</p>
+                
+                <form id="reportForm" class="support-form">
+                    <div class="form-group">
+                        <label for="reportedUsername">Ник скамера *</label>
+                        <input type="text" id="reportedUsername" placeholder="Введите ник пользователя" required>
+                        <input type="hidden" id="reportedUserId">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="orderId">ID заказа (если есть)</label>
+                        <input type="number" id="orderId" placeholder="Номер заказа">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reason">Причина *</label>
+                        <select id="reason" required>
+                            <option value="">Выберите причину...</option>
+                            <option value="scam">Скам (не отдал товар)</option>
+                            <option value="fake_account">Фейковый аккаунт</option>
+                            <option value="wrong_data">Неверные данные аккаунта</option>
+                            <option value="no_payment">Не получил оплату</option>
+                            <option value="other">Другое</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Подробное описание *</label>
+                        <textarea id="description" rows="6" placeholder="Опишите что произошло..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Отправить жалобу</button>
+                </form>
+            </div>
+
+            <!-- My Tickets -->
+            <div class="support-card">
+                <h3>📋 Мои жалобы</h3>
+                <div id="ticketsList" class="tickets-list">
+                    <div class="loading">Загрузка...</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 BFshop. Все права защищены.</p>
+            <p>Торгуйте безопасно с оплатой фруктами!</p>
+        </div>
+    </footer>
+
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/support.js"></script>
+</body>
+</html>

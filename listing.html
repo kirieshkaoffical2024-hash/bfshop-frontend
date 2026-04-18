@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Объявление - BFshop</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>🎮 BFshop</h1>
+                </div>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link">Главная</a>
+                    <a href="#" class="nav-link" id="myListingsLink">Мои объявления</a>
+                    <a href="#" class="nav-link" id="myOrdersLink">Мои заказы</a>
+                    <a href="create-listing.html" class="nav-link">Продать</a>
+                </nav>
+                <div class="header-actions">
+                    <div class="user-menu" id="userMenu" style="display: none;">
+                        <img src="" alt="Avatar" class="user-avatar" id="userAvatar">
+                        <span class="user-name" id="userName"></span>
+                        <button class="btn btn-secondary" id="logoutBtn">Выход</button>
+                    </div>
+                    <div class="auth-buttons" id="authButtons">
+                        <a href="login.html" class="btn btn-secondary">Вход</a>
+                        <a href="login.html?register=true" class="btn btn-primary">Регистрация</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Listing Details -->
+    <section class="listing-details-section">
+        <div class="container">
+            <div class="listing-details-container">
+                <div class="loading" id="loading">Загрузка...</div>
+                
+                <div id="listingContent" style="display: none;">
+                    <div class="listing-details-grid">
+                        <!-- Left: Images -->
+                        <div class="listing-images">
+                            <div class="listing-main-image">
+                                <img id="mainImage" src="" alt="Listing">
+                            </div>
+                        </div>
+
+                        <!-- Right: Info -->
+                        <div class="listing-info">
+                            <div class="listing-type-badge" id="listingType"></div>
+                            <h1 class="listing-details-title" id="listingTitle"></h1>
+                            
+                            <div class="listing-price-box">
+                                <div class="price-label">Цена:</div>
+                                <div class="price-value" id="listingPrice"></div>
+                            </div>
+
+                            <div class="listing-seller-box">
+                                <img id="sellerAvatar" src="" alt="Seller" class="seller-avatar-large">
+                                <div class="seller-info">
+                                    <div class="seller-name" id="sellerName"></div>
+                                    <div class="seller-rating" id="sellerRating"></div>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary btn-block" id="buyBtn">💰 Купить сейчас</button>
+                            <button class="btn btn-secondary btn-block" id="chatBtn" style="display: none;">💬 Чат с продавцом</button>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="listing-description-box">
+                        <h3>📝 Описание</h3>
+                        <p id="listingDescription"></p>
+                    </div>
+
+                    <!-- Reviews -->
+                    <div class="listing-reviews-box">
+                        <h3>⭐ Отзывы о продавце</h3>
+                        <div id="reviewsList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Buy Modal -->
+    <div id="buyModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Подтверждение покупки</h3>
+            <p>Вы собираетесь купить этот товар. Продавец будет уведомлен, и вы сможете обсудить оплату в чате.</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="cancelBuyBtn">Отмена</button>
+                <button class="btn btn-primary" id="confirmBuyBtn">Подтвердить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 BFshop. Все права защищены.</p>
+            <p>Торгуйте безопасно с оплатой фруктами!</p>
+        </div>
+    </footer>
+
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/listing-details.js"></script>
+</body>
+</html>
+

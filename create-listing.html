@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создать объявление - BFshop</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>🎮 BFshop</h1>
+                </div>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link">Главная</a>
+                    <a href="#" class="nav-link" id="myListingsLink">Мои объявления</a>
+                    <a href="#" class="nav-link" id="myOrdersLink">Мои заказы</a>
+                    <a href="create-listing.html" class="nav-link active">Продать</a>
+                </nav>
+                <div class="header-actions">
+                    <div class="user-menu" id="userMenu" style="display: none;">
+                        <img src="" alt="Avatar" class="user-avatar" id="userAvatar">
+                        <span class="user-name" id="userName"></span>
+                        <button class="btn btn-secondary" id="logoutBtn">Выход</button>
+                    </div>
+                    <div class="auth-buttons" id="authButtons">
+                        <a href="login.html" class="btn btn-secondary">Вход</a>
+                        <a href="login.html?register=true" class="btn btn-primary">Регистрация</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Create Listing Form -->
+    <section class="create-listing-section">
+        <div class="container">
+            <div class="create-listing-container">
+                <h2 class="page-title">🎮 Создать объявление</h2>
+                <p class="page-subtitle">Продавайте предметы и услуги Blox Fruits</p>
+
+                <form id="createListingForm" class="listing-form">
+                    <div class="form-group">
+                        <label for="listingType">Тип *</label>
+                        <select id="listingType" name="type" required>
+                            <option value="">Выберите тип...</option>
+                            <option value="account">🎮 Аккаунт</option>
+                            <option value="boost">⚡ Буст/Прокачка</option>
+                            <option value="quest">🗡️ Прохождение квестов</option>
+                            <option value="boss">👹 Призыв боссов</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="listingTitle">Название *</label>
+                        <input type="text" id="listingTitle" name="title" placeholder="Например: Макс уровень с фруктом Тигр" required maxlength="200">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="listingDescription">Описание *</label>
+                        <textarea id="listingDescription" name="description" rows="6" placeholder="Опишите ваш товар подробно..." required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="priceFruit">Фрукт для оплаты *</label>
+                            <select id="priceFruit" name="price_fruit" required>
+                                <option value="">Выберите фрукт...</option>
+                                <option value="Тигр">🐅 Тигр (Tiger)</option>
+                                <option value="Дракон">🐉 Дракон (Dragon)</option>
+                                <option value="Тесто">🍩 Тесто (Dough)</option>
+                                <option value="Тень">👤 Тень (Shadow)</option>
+                                <option value="Яд">☠️ Яд (Venom)</option>
+                                <option value="Дух">👻 Дух (Spirit)</option>
+                                <option value="Контроль">🎮 Контроль (Control)</option>
+                                <option value="Метель">❄️ Метель (Blizzard)</option>
+                                <option value="Мамонт">🦣 Мамонт (Mammoth)</option>
+                                <option value="Ти-Рекс">🦖 Ти-Рекс (T-Rex)</option>
+                                <option value="Кицунэ">🦊 Кицунэ (Kitsune)</option>
+                                <option value="Гравитация">🌀 Гравитация (Gravity)</option>
+                                <option value="Боль">💢 Боль (Pain)</option>
+                                <option value="Феникс">🔥 Феникс (Phoenix)</option>
+                                <option value="Портал">🌀 Портал (Portal)</option>
+                                <option value="Резина">🎈 Резина (Rubber)</option>
+                                <option value="Будда">🙏 Будда (Buddha)</option>
+                                <option value="Любовь">💕 Любовь (Love)</option>
+                                <option value="Паук">🕷️ Паук (Spider)</option>
+                                <option value="Звук">🔊 Звук (Sound)</option>
+                                <option value="Лёд">🧊 Лёд (Ice)</option>
+                                <option value="Песок">🏜️ Песок (Sand)</option>
+                                <option value="Тьма">🌑 Тьма (Dark)</option>
+                                <option value="Свет">💡 Свет (Light)</option>
+                                <option value="Магма">🌋 Магма (Magma)</option>
+                                <option value="Пламя">🔥 Пламя (Flame)</option>
+                                <option value="Дым">💨 Дым (Smoke)</option>
+                                <option value="Взрыв">💥 Взрыв (Bomb)</option>
+                                <option value="Барьер">🛡️ Барьер (Barrier)</option>
+                                <option value="Ракета">🚀 Ракета (Rocket)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="priceAmount">Количество *</label>
+                            <input type="number" id="priceAmount" name="price_amount" min="1" placeholder="1" required>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic fields based on type -->
+                    <div id="dynamicFields"></div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="window.location.href='index.html'">Отмена</button>
+                        <button type="submit" class="btn btn-primary">Создать объявление</button>
+                    </div>
+                </form>
+
+                <div id="formMessage" class="auth-message" style="display: none;"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 BFshop. Все права защищены.</p>
+            <p>Торгуйте безопасно с оплатой фруктами!</p>
+        </div>
+    </footer>
+
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/create-listing.js"></script>
+</body>
+</html>
+
