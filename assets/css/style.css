@@ -761,6 +761,25 @@ body {
     max-width: 70%;
 }
 
+.message.own {
+    background: var(--primary);
+    margin-left: auto;
+}
+
+.message.other {
+    background: var(--accent);
+}
+
+.message.system {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 152, 0, 0.2));
+    border: 2px solid rgba(255, 193, 7, 0.5);
+    margin: 1rem auto;
+    text-align: center;
+    max-width: 90%;
+    font-style: italic;
+    color: #ffc107;
+}
+
 .message-own {
     background: var(--primary);
     margin-left: auto;
