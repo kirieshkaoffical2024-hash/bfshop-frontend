@@ -28,7 +28,7 @@ async function searchUser() {
     if (!username) return;
     
     try {
-        const response = await apiRequest(`/users/search?username=${username}`);
+        const response = await apiRequest(`/users/find?username=${encodeURIComponent(username)}`);
         
         if (response.users && response.users.length > 0) {
             const user = response.users[0];
