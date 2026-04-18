@@ -1,193 +1,177 @@
-// BFshop - Main App JavaScript
+// Chat Client JavaScript (без WebSocket, на polling)
 
-const API_URL = 'https://bfshop-backend.vercel.app/api';
+let currentUser = null;
+let currentOrder = null;
+let orderId = null;
+let pollingInterval = null;
+let lastMessageId = 0;
 
-// Get token from localStorage
-function getToken() {
-    return localStorage.getItem('token');
+// Get order ID from URL
+function getOrderIdFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('order');
 }
 
-// Set token
-function setToken(token) {
-    localStorage.setItem('token', token);
-}
-
-// Remove token
-function removeToken() {
-    localStorage.removeItem('token');
-}
-
-// API request helper
-async function apiRequest(endpoint, options = {}) {
-    const token = getToken();
-    
-    const headers = {
-        'Content-Type': 'application/json',
-        ...options.headers
-    };
-    
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-    
+// Initialize chat
+async function initChat() {
     try {
-        const response = await fetch(`${API_URL}${endpoint}`, {
-            ...options,
-            headers
+        orderId = getOrderIdFromUrl();
+        
+        if (!orderId) {
+            window.location.href = 'orders.html';
+            return;
+        }
+        
+        currentUser = await checkAuth();
+        
+        if (!currentUser) {
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        // Load order details
+        const orderResponse = await apiRequest(`/orders/${orderId}`);
+        currentOrder = orderResponse.order;
+        
+        // Update UI
+        document.getElementById('chatTitle').textContent = `Заказ #${orderId}: ${currentOrder.listing_title}`;
+        
+        // Load messages
+        await loadMessages();
+        
+        // Start polling (обновление каждую секунду для реального времени)
+        pollingInterval = setInterval(loadMessages, 1000);
+        
+        // Send message handler
+        const sendBtn = document.getElementById('sendBtn');
+        const messageInput = document.getElementById('messageInput');
+        
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
         });
         
-        const data = await response.json();
+        // Show chat
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('chatContainer').style.display = 'flex';
         
-        if (!response.ok) {
-            throw new Error(data.error || 'Request failed');
-        }
-        
-        return data;
     } catch (error) {
-        console.error('API Error:', error);
-        throw error;
+        console.error('Error initializing chat:', error);
+        document.getElementById('loading').textContent = 'Ошибка загрузки чата';
     }
 }
 
-// Check if user is logged in
-async function checkAuth() {
-    const token = getToken();
-    
-    if (!token) {
-        return null;
+// Load messages
+async function loadMessages() {
+    try {
+        const response = await apiRequest(`/chat/${orderId}`);
+        const messages = response.messages || [];
+        
+        const messagesContainer = document.getElementById('messages');
+        
+        // Проверяем есть ли новые сообщения
+        if (messages.length > 0) {
+            const latestId = messages[messages.length - 1].id;
+            
+            if (latestId > lastMessageId) {
+                // Есть новые сообщения - обновляем
+                messagesContainer.innerHTML = '';
+                
+                messages.forEach(msg => {
+                    const messageEl = createMessageElement(msg);
+                    messagesContainer.appendChild(messageEl);
+                });
+                
+                lastMessageId = latestId;
+                
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        } else if (lastMessageId === 0) {
+            // Первая загрузка, сообщений нет
+            messagesContainer.innerHTML = '<div class="no-messages">Нет сообщений. Начните диалог!</div>';
+        }
+        
+    } catch (error) {
+        console.error('Error loading messages:', error);
     }
+}
+
+// Create message element
+function createMessageElement(message) {
+    const div = document.createElement('div');
+    
+    // Системное сообщение
+    if (message.is_system) {
+        div.className = 'message system';
+        div.innerHTML = `
+            <div class="message-text">${escapeHtml(message.message).replace(/\n/g, '<br>')}</div>
+        `;
+        return div;
+    }
+    
+    // Обычное сообщение
+    const isOwn = message.sender_id === currentUser.id;
+    div.className = `message ${isOwn ? 'own' : 'other'}`;
+    
+    const time = new Date(message.created_at).toLocaleTimeString('ru-RU', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    div.innerHTML = `
+        <div class="message-header">
+            <span class="message-sender">${message.sender_name}</span>
+            <span class="message-time">${time}</span>
+        </div>
+        <div class="message-text">${escapeHtml(message.message)}</div>
+    `;
+    
+    return div;
+}
+
+// Send message
+async function sendMessage() {
+    const input = document.getElementById('messageInput');
+    const message = input.value.trim();
+    
+    if (!message) return;
     
     try {
-        const data = await apiRequest('/auth/me');
-        return data.user;
-    } catch (error) {
-        removeToken();
-        return null;
-    }
-}
-
-// Update UI based on auth status
-async function updateAuthUI() {
-    const user = await checkAuth();
-    
-    const userMenu = document.getElementById('userMenu');
-    const authButtons = document.getElementById('authButtons');
-    const userName = document.getElementById('userName');
-    const userAvatar = document.getElementById('userAvatar');
-    const adminLink = document.getElementById('adminLink');
-    
-    if (user) {
-        if (userMenu) userMenu.style.display = 'flex';
-        if (authButtons) authButtons.style.display = 'none';
-        if (userName) userName.textContent = user.username;
-        if (userAvatar) {
-            userAvatar.src = user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=667eea&color=fff&size=80`;
-        }
+        await apiRequest(`/chat/${orderId}`, {
+            method: 'POST',
+            body: JSON.stringify({ message })
+        });
         
-        // Показываем ссылку на админ-панель для админов
-        if (adminLink && user.is_admin) {
-            adminLink.style.display = 'inline-block';
-        }
-    } else {
-        if (userMenu) userMenu.style.display = 'none';
-        if (authButtons) authButtons.style.display = 'flex';
-        if (adminLink) adminLink.style.display = 'none';
+        input.value = '';
+        
+        // Сразу загружаем новые сообщения
+        await loadMessages();
+        
+    } catch (error) {
+        console.error('Error sending message:', error);
+        alert('Ошибка отправки сообщения');
     }
-    
-    return user;
 }
 
-// Logout
-function logout() {
-    removeToken();
-    window.location.href = 'index.html';
+// Escape HTML to prevent XSS
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
-// Initialize
-document.addEventListener('DOMContentLoaded', async () => {
-    const user = await updateAuthUI();
-    
-    // Logout button
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', logout);
-    }
-    
-    // Navigation links
-    const myListingsLink = document.getElementById('myListingsLink');
-    const myOrdersLink = document.getElementById('myOrdersLink');
-    
-    if (myListingsLink && user) {
-        myListingsLink.href = `profile.html?id=${user.id}`;
-    }
-    
-    if (myOrdersLink && user) {
-        myOrdersLink.href = 'orders.html';
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
     }
 });
 
-// Show message
-function showMessage(message, type = 'info') {
-    const messageEl = document.getElementById('authMessage');
-    if (messageEl) {
-        messageEl.textContent = message;
-        messageEl.className = `auth-message ${type}`;
-        messageEl.style.display = 'block';
-        
-        setTimeout(() => {
-            messageEl.style.display = 'none';
-        }, 5000);
-    }
-}
-
-// Показать красивое уведомление
-function showNotification(title, message, type = 'info') {
-    // Удаляем старые уведомления
-    const oldNotifications = document.querySelectorAll('.notification');
-    oldNotifications.forEach(n => n.remove());
-    
-    // Создаем новое уведомление
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    
-    const icons = {
-        success: '✅',
-        error: '❌',
-        warning: '⚠️',
-        info: 'ℹ️'
-    };
-    
-    notification.innerHTML = `
-        <button class="notification-close" onclick="this.parentElement.remove()">×</button>
-        <div class="notification-header">
-            <span class="notification-icon">${icons[type] || icons.info}</span>
-            <span class="notification-title">${title}</span>
-        </div>
-        <div class="notification-message">${message}</div>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Автоматически удаляем через 5 секунд
-    setTimeout(() => {
-        notification.style.animation = 'slideOutRight 0.4s ease-out';
-        setTimeout(() => notification.remove(), 400);
-    }, 5000);
-}
-
-// Format date
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
-}
-
-// Format rating
-function formatRating(rating) {
-    const numRating = parseFloat(rating) || 0;
-    const stars = '⭐'.repeat(Math.round(numRating));
-    return `${stars} ${numRating.toFixed(1)}`;
-}
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    initChat();
+});
