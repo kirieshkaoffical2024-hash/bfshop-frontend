@@ -187,6 +187,7 @@ function formatDate(dateString) {
 
 // Format rating
 function formatRating(rating) {
-    const stars = '⭐'.repeat(Math.round(rating));
-    return `${stars} ${rating.toFixed(1)}`;
+    const numRating = parseFloat(rating) || 0;
+    const stars = '⭐'.repeat(Math.round(numRating));
+    return `${stars} ${numRating.toFixed(1)}`;
 }
