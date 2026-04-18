@@ -1,340 +1,193 @@
-// Chat Client JavaScript with Socket.IO
+// BFshop - Main App JavaScript
 
-let socket = null;
-let currentUser = null;
-let orderId = null;
-let order = null;
-let selectedRating = 0;
+const API_URL = 'https://bfshop-backend.vercel.app/api';
 
-// Get order ID from URL
-function getOrderIdFromUrl() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('order');
+// Get token from localStorage
+function getToken() {
+    return localStorage.getItem('token');
 }
 
-// Initialize chat
-async function initChat() {
-    try {
-        orderId = getOrderIdFromUrl();
-        
-        if (!orderId) {
-            window.location.href = 'orders.html';
-            return;
-        }
-        
-        currentUser = await checkAuth();
-        
-        if (!currentUser) {
-            window.location.href = 'login.html';
-            return;
-        }
-        
-        // Load order details
-        order = await apiRequest(`/orders/${orderId}`);
-        
-        // Update UI
-        document.getElementById('orderTitle').textContent = order.order.title;
-        document.getElementById('orderStatus').textContent = `Статус: ${getStatusText(order.order.status)}`;
-        document.getElementById('orderStatus').className = `order-status status-${order.order.status}`;
-        
-        // Show order actions for seller
-        if (currentUser.id === order.order.seller_id && order.order.status === 'pending') {
-            document.getElementById('orderActions').style.display = 'block';
-        }
-        
-        // Show review section if completed and buyer
-        if (order.order.status === 'completed' && currentUser.id === order.order.buyer_id) {
-            document.getElementById('reviewSection').style.display = 'block';
-        }
-        
-        // Load chat messages
-        await loadMessages();
-        
-        // Connect to WebSocket
-        connectSocket();
-        
-    } catch (error) {
-        console.error('Error initializing chat:', error);
-        showNotification('❌ Ошибка', 'Не удалось загрузить чат', 'error');
-    }
+// Set token
+function setToken(token) {
+    localStorage.setItem('token', token);
 }
 
-// Load messages
-async function loadMessages() {
-    try {
-        const messages = await apiRequest(`/chat/${orderId}`);
-        
-        const container = document.getElementById('chatMessages');
-        container.innerHTML = '';
-        
-        if (messages.length === 0) {
-            container.innerHTML = '<div class="no-messages">Нет сообщений. Начните разговор!</div>';
-            return;
-        }
-        
-        messages.forEach(msg => {
-            appendMessage(msg);
-        });
-        
-        scrollToBottom();
-        
-    } catch (error) {
-        console.error('Error loading messages:', error);
-    }
+// Remove token
+function removeToken() {
+    localStorage.removeItem('token');
 }
 
-// Connect to Socket.IO
-function connectSocket() {
-    const SOCKET_URL = 'http://localhost:3000';
+// API request helper
+async function apiRequest(endpoint, options = {}) {
+    const token = getToken();
     
-    socket = io(SOCKET_URL, {
-        auth: {
-            token: getToken()
-        }
-    });
-    
-    socket.on('connect', () => {
-        console.log('Connected to chat server');
-        socket.emit('join-chat', orderId);
-    });
-    
-    socket.on('new-message', (message) => {
-        appendMessage(message);
-        scrollToBottom();
-    });
-    
-    socket.on('disconnect', () => {
-        console.log('Disconnected from chat server');
-    });
-}
-
-// Append message to chat
-function appendMessage(message) {
-    const container = document.getElementById('chatMessages');
-    const div = document.createElement('div');
-    
-    const isOwn = message.sender_id === currentUser.id;
-    const isSystem = message.is_system;
-    
-    if (isSystem) {
-        div.className = 'chat-message system';
-        div.innerHTML = `
-            <div class="message-content">${message.message.replace(/\n/g, '<br>')}</div>
-            <div class="message-time">${formatTime(message.created_at)}</div>
-        `;
-    } else {
-        div.className = `chat-message ${isOwn ? 'own' : 'other'}`;
-        div.innerHTML = `
-            <div class="message-header">
-                <span class="message-sender">${isOwn ? 'Вы' : message.sender_username}</span>
-                <span class="message-time">${formatTime(message.created_at)}</span>
-            </div>
-            <div class="message-content">${message.message.replace(/\n/g, '<br>')}</div>
-        `;
-    }
-    
-    container.appendChild(div);
-}
-
-// Send message
-async function sendMessage() {
-    const input = document.getElementById('messageInput');
-    const message = input.value.trim();
-    
-    if (!message) return;
-    
-    try {
-        socket.emit('send-message', {
-            orderId: orderId,
-            senderId: currentUser.id,
-            message: message
-        });
-        
-        input.value = '';
-        
-    } catch (error) {
-        console.error('Error sending message:', error);
-        showNotification('❌ Ошибка', 'Не удалось отправить сообщение', 'error');
-    }
-}
-
-// Confirm order (seller only)
-async function confirmOrder() {
-    if (!confirm('Подтвердите, что вы получили оплату фруктом?')) {
-        return;
-    }
-    
-    try {
-        const result = await apiRequest(`/orders/${orderId}/confirm`, {
-            method: 'POST'
-        });
-        
-        // Update UI
-        order.status = 'completed';
-        document.getElementById('orderStatus').textContent = 'Статус: Завершен';
-        document.getElementById('orderStatus').className = 'order-status status-completed';
-        document.getElementById('orderActions').style.display = 'none';
-        
-        // Показываем красивое уведомление
-        showNotification(
-            '✅ Заказ подтвержден!',
-            'Данные аккаунта отправлены покупателю в чат',
-            'success'
-        );
-        
-        // Перезагружаем сообщения чтобы показать данные аккаунта
-        await loadMessages();
-        
-    } catch (error) {
-        console.error('Error confirming order:', error);
-        showNotification(
-            '❌ Ошибка',
-            'Не удалось подтвердить заказ',
-            'error'
-        );
-    }
-}
-
-// Submit review
-async function submitReview() {
-    if (selectedRating === 0) {
-        showNotification('⚠️ Внимание', 'Пожалуйста, выберите рейтинг', 'warning');
-        return;
-    }
-    
-    const comment = document.getElementById('reviewComment').value.trim();
-    
-    try {
-        await apiRequest('/reviews', {
-            method: 'POST',
-            body: JSON.stringify({
-                order_id: orderId,
-                rating: selectedRating,
-                comment: comment
-            })
-        });
-        
-        document.getElementById('reviewSection').style.display = 'none';
-        showNotification(
-            '⭐ Отзыв отправлен!',
-            'Спасибо за ваш отзыв!',
-            'success'
-        );
-        
-    } catch (error) {
-        console.error('Error submitting review:', error);
-        showNotification(
-            '❌ Ошибка',
-            'Не удалось отправить отзыв',
-            'error'
-        );
-    }
-}
-
-// Format time
-function formatTime(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('ru-RU', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
-
-// Get status text in Russian
-function getStatusText(status) {
-    const statuses = {
-        'pending': 'Ожидает оплаты',
-        'payment_sent': 'Оплата отправлена',
-        'confirmed': 'Подтверждено',
-        'completed': 'Завершено',
-        'cancelled': 'Отменено'
+    const headers = {
+        'Content-Type': 'application/json',
+        ...options.headers
     };
-    return statuses[status] || status;
-}
-
-// Scroll to bottom
-function scrollToBottom() {
-    const container = document.getElementById('chatMessages');
-    container.scrollTop = container.scrollHeight;
-}
-
-// Event listeners
-document.addEventListener('DOMContentLoaded', () => {
-    // Send message
-    const sendBtn = document.getElementById('sendBtn');
-    const messageInput = document.getElementById('messageInput');
     
-    sendBtn.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
-    
-    // Confirm order
-    const confirmBtn = document.getElementById('confirmOrderBtn');
-    if (confirmBtn) {
-        confirmBtn.addEventListener('click', confirmOrder);
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
     }
     
-    // Star rating
-    const stars = document.querySelectorAll('.star');
-    stars.forEach(star => {
-        star.addEventListener('click', () => {
-            selectedRating = parseInt(star.dataset.rating);
-            
-            // Update stars
-            stars.forEach((s, index) => {
-                if (index < selectedRating) {
-                    s.textContent = '★';
-                    s.classList.add('active');
-                } else {
-                    s.textContent = '☆';
-                    s.classList.remove('active');
-                }
-            });
+    try {
+        const response = await fetch(`${API_URL}${endpoint}`, {
+            ...options,
+            headers
         });
         
-        // Hover effect
-        star.addEventListener('mouseenter', () => {
-            const rating = parseInt(star.dataset.rating);
-            stars.forEach((s, index) => {
-                if (index < rating) {
-                    s.textContent = '★';
-                } else {
-                    s.textContent = '☆';
-                }
-            });
-        });
-    });
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || 'Request failed');
+        }
+        
+        return data;
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+}
+
+// Check if user is logged in
+async function checkAuth() {
+    const token = getToken();
     
-    // Reset stars on mouse leave
-    const starRating = document.getElementById('starRating');
-    if (starRating) {
-        starRating.addEventListener('mouseleave', () => {
-            stars.forEach((s, index) => {
-                if (index < selectedRating) {
-                    s.textContent = '★';
-                } else {
-                    s.textContent = '☆';
-                }
-            });
-        });
+    if (!token) {
+        return null;
     }
     
-    // Submit review
-    const submitReviewBtn = document.getElementById('submitReviewBtn');
-    if (submitReviewBtn) {
-        submitReviewBtn.addEventListener('click', submitReview);
+    try {
+        const data = await apiRequest('/auth/me');
+        return data.user;
+    } catch (error) {
+        removeToken();
+        return null;
+    }
+}
+
+// Update UI based on auth status
+async function updateAuthUI() {
+    const user = await checkAuth();
+    
+    const userMenu = document.getElementById('userMenu');
+    const authButtons = document.getElementById('authButtons');
+    const userName = document.getElementById('userName');
+    const userAvatar = document.getElementById('userAvatar');
+    const adminLink = document.getElementById('adminLink');
+    
+    if (user) {
+        if (userMenu) userMenu.style.display = 'flex';
+        if (authButtons) authButtons.style.display = 'none';
+        if (userName) userName.textContent = user.username;
+        if (userAvatar) {
+            userAvatar.src = user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=667eea&color=fff&size=80`;
+        }
+        
+        // Показываем ссылку на админ-панель для админов
+        if (adminLink && user.is_admin) {
+            adminLink.style.display = 'inline-block';
+        }
+    } else {
+        if (userMenu) userMenu.style.display = 'none';
+        if (authButtons) authButtons.style.display = 'flex';
+        if (adminLink) adminLink.style.display = 'none';
     }
     
-    // View order
-    const viewOrderBtn = document.getElementById('viewOrderBtn');
-    if (viewOrderBtn) {
-        viewOrderBtn.addEventListener('click', () => {
-            window.location.href = `listing.html?id=${order.listing_id}`;
-        });
+    return user;
+}
+
+// Logout
+function logout() {
+    removeToken();
+    window.location.href = 'index.html';
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', async () => {
+    const user = await updateAuthUI();
+    
+    // Logout button
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
     }
     
-    initChat();
+    // Navigation links
+    const myListingsLink = document.getElementById('myListingsLink');
+    const myOrdersLink = document.getElementById('myOrdersLink');
+    
+    if (myListingsLink && user) {
+        myListingsLink.href = `profile.html?id=${user.id}`;
+    }
+    
+    if (myOrdersLink && user) {
+        myOrdersLink.href = 'orders.html';
+    }
 });
+
+// Show message
+function showMessage(message, type = 'info') {
+    const messageEl = document.getElementById('authMessage');
+    if (messageEl) {
+        messageEl.textContent = message;
+        messageEl.className = `auth-message ${type}`;
+        messageEl.style.display = 'block';
+        
+        setTimeout(() => {
+            messageEl.style.display = 'none';
+        }, 5000);
+    }
+}
+
+// Показать красивое уведомление
+function showNotification(title, message, type = 'info') {
+    // Удаляем старые уведомления
+    const oldNotifications = document.querySelectorAll('.notification');
+    oldNotifications.forEach(n => n.remove());
+    
+    // Создаем новое уведомление
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    
+    const icons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+    };
+    
+    notification.innerHTML = `
+        <button class="notification-close" onclick="this.parentElement.remove()">×</button>
+        <div class="notification-header">
+            <span class="notification-icon">${icons[type] || icons.info}</span>
+            <span class="notification-title">${title}</span>
+        </div>
+        <div class="notification-message">${message}</div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Автоматически удаляем через 5 секунд
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.4s ease-out';
+        setTimeout(() => notification.remove(), 400);
+    }, 5000);
+}
+
+// Format date
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+}
+
+// Format rating
+function formatRating(rating) {
+    const numRating = parseFloat(rating) || 0;
+    const stars = '⭐'.repeat(Math.round(numRating));
+    return `${stars} ${numRating.toFixed(1)}`;
+}
