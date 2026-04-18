@@ -1,6 +1,6 @@
 // BFshop - Main App JavaScript
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://bfshop-backend.vercel.app/api';
 
 // Get token from localStorage
 function getToken() {
